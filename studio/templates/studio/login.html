@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Multimedia Drag &amp; Drop</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{% static 'studio/css/style.css' %}">
+</head>
+<body class="auth-page">
+  <main class="auth-card">
+    <h1>Multimedia Drag &amp; Drop</h1>
+    <h2>Login</h2>
+    <form method="post">
+      {% csrf_token %}
+      {% for error in form.non_field_errors %}<p class="err">{{ error }}</p>{% endfor %}
+      {% for field in form %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="err">{{ error }}</p>{% endfor %}
+      {% endfor %}
+      <button class="btn primary wide" type="submit">Login</button>
+    </form>
+    <p class="muted">New here? <a href="/register/">Create an account</a></p>
+  </main>
+</body>
+</html>

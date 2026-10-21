@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multimedia Drag &amp; Drop</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{% static 'studio/css/style.css' %}">
+</head>
+<body>
+  {% csrf_token %}
+
+  <header class="topbar">
+    <h1>Multimedia Drag &amp; Drop</h1>
+    <div class="user">
+      <span>Hello, {{ username }}</span>
+      <form method="post" action="/logout/" class="inline">{% csrf_token %}<button class="btn small ghost" type="submit">Logout</button></form>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="images">🖼️ Images</button>
+    <button class="tab-btn" data-tab="audio">🎵 Audio</button>
+    <button class="tab-btn" data-tab="videos">🎬 Videos</button>
+    <button class="tab-btn" data-tab="projects">📁 My projects</button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ===================================================== IMAGES -->
+    <section id="tab-images" class="tab active">
+      <div class="card">
+        <div class="row">
+          <label class="btn primary">Pick images
+            <input type="file" id="imgInput" accept="image/*" multiple hidden>
+          </label>
+          <button class="btn" id="imgUndo" disabled>↶ Undo</button>
+          <button class="btn" id="imgRedo" disabled>↷ Redo</button>
+          <button class="btn" id="imgReset" disabled>⟲ Reset</button>
+        </div>
+        <div id="imgThumbs" class="thumbs"></div>
+
+        <div class="canvas-wrap">
+          <canvas id="imgCanvas" width="300" height="150" class="hidden"></canvas>
+          <p id="imgEmpty" class="empty">Pick an image to start.<br>Then click on a person and drag them to a new place.</p>
+        </div>
+        <p id="imgHint" class="hint"></p>
+
+        <div id="imgViewTools" class="row center">
+          <button class="btn" id="imgSelect" disabled title="Manual tool: draw around the person yourself">✏️ Draw outline instead</button>
+          <button class="btn" id="imgDownload" disabled>⬇ Download PNG</button>
+          <button class="btn" id="imgSave" disabled>☁ Save project</button>
+        </div>
+        <div id="imgSelectTools" class="row center hidden">
+          <button class="btn primary" id="imgCut">Cut out</button>
+          <button class="btn" id="imgClearLasso">Clear line</button>
+          <button class="btn ghost" id="imgCancelSelect">Cancel</button>
+        </div>
+        <div id="imgMoveTools" class="row center hidden">
+          <label class="slider">Size <input type="range" id="personScale" min="0.4" max="1.8" step="0.01" value="1"></label>
+          <label class="slider" title="How much the person's light and colour follow the new place">Match colours <input type="range" id="personBlend" min="0" max="1" step="0.05" value="0.6"></label>
+          <label class="slider"><input type="checkbox" id="personShadow"> Soft shadow</label>
+          <button class="btn primary" id="imgApply">✔ Apply</button>
+          <button class="btn ghost" id="imgCancelMove">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== AUDIO -->
+    <section id="tab-audio" class="tab">
+      <div class="card">
+        <div class="row">
+          <label class="btn primary">Add audio files
+            <input type="file" id="audioInput" accept="audio/*" multiple hidden>
+          </label>
+          <span id="audioCount" class="muted"></span>
+        </div>
+        <p class="hint">Drag the ☰ handle to change the order (or use the ↑ ↓ buttons).</p>
+        <ul id="audioList" class="sortlist"></ul>
+        <p id="audioEmpty" class="empty">No audio files yet.</p>
+        <div class="row center">
+          <button class="btn primary" id="audioMerge" disabled>Combine in this order</button>
+        </div>
+        <div id="audioResult" class="result hidden">
+          <h3>Merged audio</h3>
+          <audio controls id="audioResultPlayer"></audio>
+          <a class="btn" id="audioDownload" download="merged_audio.mp3">⬇ Download MP3</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== VIDEOS -->
+    <section id="tab-videos" class="tab">
+      <div class="card">
+        <div class="row">
+          <label class="btn primary">Pick a video
+            <input type="file" id="videoInput" accept="video/*" hidden>
+          </label>
+          <span id="videoInfo" class="muted"></span>
+        </div>
+        <video id="videoPlayer" controls playsinline class="hidden"></video>
+        <p id="videoEmpty" class="empty">Pick a video, split it into clips, drag the clips into a new order, then export.</p>
+
+        <div id="videoTools" class="hidden">
+          <div class="row">
+            <button class="btn" id="videoSplitHere">✂️ Split at current time</button>
+            <span class="muted">or split equally into</span>
+            <select id="videoParts">
+              <option>2</option><option selected>3</option><option>4</option><option>5</option>
+              <option>6</option><option>7</option><option>8</option>
+            </select>
+            <button class="btn" id="videoSplitEqual">Split</button>
+          </div>
+          <h3>Clips <small class="muted">(drag ☰ to reorder)</small></h3>
+          <ul id="videoList" class="sortlist"></ul>
+          <div class="row center">
+            <button class="btn primary" id="videoExport">Combine &amp; export video</button>
+          </div>
+        </div>
+
+        <div id="videoResult" class="result hidden">
+          <h3>Exported video</h3>
+          <video controls playsinline id="videoResultPlayer"></video>
+          <a class="btn" id="videoDownload" download="exported_video.mp4">⬇ Download MP4</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== PROJECTS -->
+    <section id="tab-projects" class="tab">
+      <div class="card">
+        <h3>My saved projects</h3>
+        <ul id="projectList" class="projects"></ul>
+        <p id="projectEmpty" class="empty">Nothing saved yet.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- busy overlay with progress bar -->
+  <div id="busy" class="busy hidden">
+    <div class="busy-box">
+      <p id="busyText">Working...</p>
+      <div class="bar"><div id="busyBar" class="bar-fill indeterminate"></div></div>
+    </div>
+  </div>
+  <div id="toasts" class="toasts"></div>
+
+  <script src="{% static 'studio/js/api.js' %}"></script>
+  <script src="{% static 'studio/js/sortable.js' %}"></script>
+  <script src="{% static 'studio/js/cutout.js' %}"></script>
+  <script src="{% static 'studio/js/harmonize.js' %}"></script>
+  <script src="{% static 'studio/js/images.js' %}"></script>
+  <script src="{% static 'studio/js/audio.js' %}"></script>
+  <script src="{% static 'studio/js/video.js' %}"></script>
+  <script src="{% static 'studio/js/projects.js' %}"></script>
+  <script src="{% static 'studio/js/main.js' %}"></script>
+</body>
+</html>

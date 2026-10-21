@@ -1,0 +1,5 @@
+# Extra packages for "click on a person" + "fill the empty background".
+# Install AFTER requirements.txt:   pip install -r requirements-ai.txt
+# Use Python 3.10 - 3.12 for these (they bring PyTorch, numpy and OpenCV with them).
+ultralytics            # YOLO (finds people) + SAM (draws the exact outline)
+simple-lama-inpainting # LaMa model (fills the empty place realistically)

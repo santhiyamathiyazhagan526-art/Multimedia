@@ -1,0 +1,8 @@
+venv/
+.env
+media/
+db.sqlite3
+__pycache__/
+*.pt
+ai_venv/
+*.pt
